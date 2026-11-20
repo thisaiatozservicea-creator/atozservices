@@ -5,8 +5,74 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#ffffff">
-<meta name="google-site-verification" content="k0YyLpk9uZbhM109juWUrSG2qF3sC_J9T978HxmDvc4" />
-<title>tsytaxi</title>
+<meta name="color-scheme" content="light">
+
+<!-- GOOGLE SEARCH VERIFICATION -->
+<meta name="google-site-verification"
+content="k0YyLpk9uZbhM109juWUrSG2qF3sC_J9T978HxmDvc4">
+
+<!-- SEO TITLE AND DESCRIPTION -->
+<title>TSY TAXI | Online Auto Booking</title>
+
+<meta name="description"
+content="Welcome to TSY TAXI. Book your taxi online with convenient ride booking, driver assignment, live ride tracking and a simple booking experience.">
+
+<meta name="author" content="TSY TAXI">
+<meta name="robots" content="index, follow, max-image-preview:large">
+
+<meta name="application-name" content="TSY TAXI">
+
+<!-- CANONICAL URL -->
+<link rel="canonical" href="https://tsytaxi.vercel.app/">
+
+<!-- WEBSITE LOGO AND FAVICON -->
+<link rel="icon" type="image/jpeg" href="logo.jpeg">
+<link rel="apple-touch-icon" href="logo.jpeg">
+
+<!-- OPEN GRAPH / WHATSAPP / FACEBOOK -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="TSY TAXI">
+<meta property="og:title" content="TSY TAXI | Book Your Ride">
+<meta property="og:description"
+content="Book your taxi online with TSY TAXI. Enjoy convenient ride booking and live driver tracking.">
+<meta property="og:url" content="https://tsytaxi.vercel.app/">
+<meta property="og:image" content="https://tsytaxi.vercel.app/tsy-logo.jpeg">
+<meta property="og:image:alt" content="TSY TAXI official logo">
+
+<!-- TWITTER / X PREVIEW -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="TSY TAXI | Online Taxi Booking">
+<meta name="twitter:description"
+content="Book your ride online with TSY TAXI.">
+<meta name="twitter:image"
+content="https://tsytaxi.vercel.app/tsy-logo.jpeg">
+
+<!-- GOOGLE STRUCTURED DATA -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://tsytaxi.vercel.app/#website",
+      "name": "TSY TAXI",
+      "url": "https://tsytaxi.vercel.app/",
+      "description": "Online taxi booking and ride service."
+    },
+    {
+      "@type": "TaxiService",
+      "@id": "https://tsytaxi.vercel.app/#taxi-service",
+      "name": "TSY TAXI",
+      "url": "https://tsytaxi.vercel.app/",
+      "image": "https://tsytaxi.vercel.app/tsy-logo.jpeg",
+      "logo": "https://tsytaxi.vercel.app/tsy-logo.jpeg",
+      "description": "TSY TAXI provides online taxi booking and convenient ride services."
+    }
+  ]
+}
+</script>
+
+<title>TSY TAXI</title>
 
 <style>
 * {
@@ -100,7 +166,6 @@ body {
     from { opacity: 0; }
     to { opacity: 1; }
 }
-
 </style>
 </head>
 
@@ -108,14 +173,17 @@ body {
 
 <div class="splash-screen">
 
-    <!-- TSY TAXI LOGO -->
+    <!-- TSY TAXI OFFICIAL LOGO -->
     <img
-        src="tsy-logo.jpeg"
-        alt="TSY TAXI Logo"
+        src="/tsy-logo.jpeg"
+        alt="TSY TAXI - Official Taxi Booking Logo"
         class="logo"
+        width="650"
+        height="400"
+        fetchpriority="high"
     >
 
-    <!-- ANIMATED LOADING CIRCLE -->
+    <!-- ANIMATED LOADING -->
     <div class="loading"></div>
 
     <div class="loading-text">LOADING...</div>
@@ -128,8 +196,7 @@ body {
 </div>
 
 <script>
-    // Automatically open login page after 1 second
-   window.addEventListener("load", function () {
+window.addEventListener("load", function () {
     setTimeout(function () {
         window.location.replace("login.html");
     }, 3500);
