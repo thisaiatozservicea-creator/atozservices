@@ -292,7 +292,7 @@ main{min-height:calc(100svh - 98px);display:grid;place-items:center;padding:18px
    <div class="fare-price" id="fareValue">₹0.00</div>
    <div class="fare-meta" id="fareMeta">Enter pickup and destination</div>
   </div>
-  <div class="fare-rate">₹25 / KM</div>
+  <div class="fare-rate" id="fareRateLabel">₹23 / KM ≤25 km<br>₹21 / KM above 25 km</div>
  </div>
 
  <div class="distance">
@@ -302,7 +302,7 @@ main{min-height:calc(100svh - 98px);display:grid;place-items:center;padding:18px
 
  <button class="primary" id="continueBtn" type="button" disabled>CONTINUE TO BOOKING →</button>
  <div class="status" id="statusBox" aria-live="polite"></div>
- <p class="hint">Fare: ₹25 per driving kilometre. Pickup and destination must each be within 50 km of Thisayanvilai, and at least one must be within 5 km.</p>
+ <p class="hint">Fare: ₹23/km up to 25 km; ₹21/km above 25 km. Pickup and destination must each be within 50 km of Thisayanvilai, and at least one must be within 5 km.</p>
 </section>
 </main>
 
@@ -361,6 +361,31 @@ main{min-height:calc(100svh - 98px);display:grid;place-items:center;padding:18px
   </div>
   <div class="profile-modal-body">
    <div id="bookingsList"></div>
+  </div>
+ </div>
+</div>
+
+
+<!-- Help & Support -->
+<div class="profile-modal" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+ <div class="profile-dialog">
+  <div class="profile-modal-header">
+   <h2 id="helpTitle">Help &amp; Support</h2>
+   <button class="profile-modal-close" id="helpModalClose" type="button" aria-label="Close help">✕</button>
+  </div>
+  <div class="profile-modal-body">
+   <div style="text-align:center;margin-bottom:22px">
+    <div style="font-size:38px;margin-bottom:8px">🎧</div>
+    <h3 style="margin:0 0 7px;font-size:18px">How can we help you?</h3>
+    <p style="margin:0;color:#777;font-size:13px;line-height:1.6">Our TSY TAXI support team is here to help with bookings, fares, payments and ride-related questions.</p>
+   </div>
+   <a href="tel:9087950990" style="display:flex;align-items:center;gap:13px;padding:15px;border:1px solid #eee;border-radius:13px;text-decoration:none;color:#111;margin-bottom:11px">
+    <span style="font-size:24px">📞</span><span><strong style="display:block;font-size:13px">Call Support</strong><small style="color:#777">9087950990</small></span>
+   </a>
+   <a href="mailto:tsytaxisupport@gmail.com?subject=TSY%20TAXI%20Support" style="display:flex;align-items:center;gap:13px;padding:15px;border:1px solid #eee;border-radius:13px;text-decoration:none;color:#111">
+    <span style="font-size:24px">✉️</span><span><strong style="display:block;font-size:13px">Email Support</strong><small style="color:#777">tsytaxisupport@gmail.com</small></span>
+   </a>
+   <p style="font-size:11px;color:#888;text-align:center;margin:18px 0 0">Please share your registered phone number and booking details when contacting us.</p>
   </div>
  </div>
 </div>
@@ -440,8 +465,16 @@ loadUserFromFirestore();
 ========================================= */
 const SERVICE_CENTER={name:"Thisayanvilai",lat:8.33611,lon:77.86444};
 const SERVICE_RADIUS_KM=50;
-const RATE_PER_KM=25;
-const RATE_PER_METRE=RATE_PER_KM/1000;
+const RATE_UP_TO_25_KM=23;
+const RATE_ABOVE_25_KM=21;
+const RATE_THRESHOLD_KM=25;
+function getRateForDistance(distanceKm){
+  return distanceKm<=RATE_THRESHOLD_KM?RATE_UP_TO_25_KM:RATE_ABOVE_25_KM;
+}
+function calculateFare(distanceMeters){
+  const km=distanceMeters/1000;
+  return distanceMeters*getRateForDistance(km)/1000;
+}
 const NEAR_CENTRE_KM=5;
 
 const NOMINATIM_URL="https://nominatim.openstreetmap.org/search";
@@ -464,6 +497,7 @@ const BOX=(()=>{
 
 /* English / Tamil spelling variants -> search words */
 const ALIASES={
+  "thachanvilai":"Thachanvilai","thachan vilai":"Thachanvilai","தச்சன்விளை":"Thachanvilai",
   "thisayanvilai":"Thisayanvilai","thisaiyanvilai":"Thisayanvilai",
   "thisayan vilai":"Thisayanvilai","thisaiyan vilai":"Thisayanvilai",
   "thisaiyanvili":"Thisayanvilai","thisiyanvili":"Thisayanvilai",
@@ -540,7 +574,7 @@ const LOCAL_AREAS=[
 "கும்பிகுளம்","சமூகரெங்கபுரம்","துறைகுடியிருப்பு","கள்ளிகுளம்",
 "மடப்புரம்","வள்ளியூர்","இடிந்தகரை","கூடன்குளம்","பார்க்கனேரி",
 "திசையன்விளை","உடன்குடி","திருச்செந்தூர்","பணகுடி","அம்பாசமுத்திரம்",
-"Thisayanvilai","Thisaiyanvilai","Thisayan Vilai",
+"Thachanvilai","Thisayanvilai","Thisaiyanvilai","Thisayan Vilai",
 "Udangudi","Sathankulam","Nanguneri","Valliyur","Panagudi",
 "Radhapuram","Uvari","Manapad","Koodankulam","Tiruchendur",
 "Idinthakarai","Periyathalai","Megnanapuram","Tattarmadam",
@@ -880,6 +914,13 @@ function renderSuggestions(which,query,remote){
   const list=which==="pickup"?pickupSuggestions:destinationSuggestions;
   list.innerHTML="";
 
+  const thachanKey=normalize(query);
+  if(["thachanvilai","thachan vilai","தச்சன்விளை"].map(normalize).some(name=>name===thachanKey || (thachanKey.length>=3 && name.startsWith(thachanKey)))){
+    const thachan={area:"Thachanvilai",displayName:"Thachanvilai, Tamil Nadu",lat:8.33689,lon:77.89625,method:"verified-local"};
+    addSuggestion(list,thachan,"Thachanvilai · verified map location · 8.33689° N, 77.89625° E",
+      sel=>selectLocation(which,sel));
+  }
+
   remote.forEach(location=>{
     const km=distanceFromCentre(location).toFixed(1);
     addSuggestion(list,location,
@@ -890,7 +931,7 @@ function renderSuggestions(which,query,remote){
   /* Tamil/English locality names (shown after real map results) */
   const shownKeys=new Set(remote.map(r=>normalize(r.area)));
   getLocalSuggestions(query)
-    .filter(a=>!shownKeys.has(normalize(a)))
+    .filter(a=>!shownKeys.has(normalize(a)) && normalize(a)!=="thachanvilai")
     .slice(0,remote.length?3:6)
     .forEach(area=>{
       addSuggestion(list,{area,displayName:area,method:"local"},
@@ -1092,15 +1133,16 @@ async function calculateBoth(){
     routeDistanceMeters=route.distance;
     routeDurationSeconds=route.duration;
 
-    const fare=routeDistanceMeters*RATE_PER_METRE;
     const km=routeDistanceMeters/1000;
+    const appliedRate=getRateForDistance(km);
+    const fare=calculateFare(routeDistanceMeters);
 
     drawRoute(from,to,route.geometry);
 
     fareValue.textContent="₹"+fare.toFixed(2);
     distanceValue.textContent=km.toFixed(2)+" km";
     fareMeta.textContent=Math.round(routeDistanceMeters)+" metres · "+
-      formatDuration(routeDurationSeconds)+" estimated · ₹25/km";
+      formatDuration(routeDurationSeconds)+" estimated · ₹"+appliedRate+"/km";
 
     continueBtn.disabled=false;
     showStatus("Service available! Estimated fare: ₹"+fare.toFixed(2)+".","success");
@@ -1194,8 +1236,8 @@ continueBtn.addEventListener("click",()=>{
     destination:{...destination},
     distanceMeters:routeDistanceMeters,
     distanceKm:Number((routeDistanceMeters/1000).toFixed(3)),
-    fare:Number((routeDistanceMeters*RATE_PER_METRE).toFixed(2)),
-    ratePerKm:RATE_PER_KM,
+    fare:Number(calculateFare(routeDistanceMeters).toFixed(2)),
+    ratePerKm:getRateForDistance(routeDistanceMeters/1000),
     estimatedDurationSeconds:routeDurationSeconds,
     estimatedDuration:formatDuration(routeDurationSeconds),
     createdAt:new Date().toISOString()
@@ -1216,6 +1258,18 @@ const sidebarAvatar=document.getElementById("sidebarAvatar");
 const sidebarName=document.getElementById("sidebarName");
 const sidebarPhone=document.getElementById("sidebarPhone");
 const logoutBtn=document.getElementById("logoutBtn");
+const helpModal=document.getElementById("helpModal");
+const helpModalClose=document.getElementById("helpModalClose");
+const menuHelp=document.getElementById("menuHelp");
+
+function openHelpModal(){
+  closeSidebar();
+  helpModal.classList.add("open");
+}
+function closeHelpModal(){helpModal.classList.remove("open");}
+menuHelp.addEventListener("click",e=>{e.preventDefault();openHelpModal();});
+helpModalClose.addEventListener("click",closeHelpModal);
+helpModal.addEventListener("click",e=>{if(e.target===helpModal)closeHelpModal();});
 
 function openSidebar(){
   sidebar.classList.add("open");
